@@ -33,12 +33,14 @@ export const getExpensesDistributionByCategory = async (req, res) => {
         const [rows] = await pool.query(
             `
             SELECT
-                c.categoria AS categoria,  -- Cambiamos 'c.nombre' por 'c.categoria'
+                c.categoria AS categoria,
                 SUM(t.monto) AS total_gastos
             FROM transacciones t
             JOIN categorias c ON t.categoria_id = c.id
             WHERE t.tipo_id = 2  -- Solo egresos
             AND t.usuario_id = ?
+            AND YEAR(t.fecha) = YEAR(NOW())  -- Solo año actual
+            AND MONTH(t.fecha) = MONTH(NOW())  -- Solo mes actual
             GROUP BY categoria
         `,
             [userID]
@@ -79,27 +81,27 @@ export const getMonthlyBalanceEvolution = async (req, res) => {
 // 4. Gráfico de barras: Comparación de gastos por categoría en un rango de fechas
 export const getExpensesByCategoryInDateRange = async (req, res) => {
     const { userID } = req.params;
-    const { startDate, endDate } = req.query;
 
     try {
         const [rows] = await pool.query(
             `
             SELECT
-                c.nombre AS categoria,
+                c.categoria AS categoria,
                 SUM(t.monto) AS total_gastos
             FROM transacciones t
             JOIN categorias c ON t.categoria_id = c.id
-            WHERE t.tipo_id = 2
+            WHERE t.tipo_id = 2  -- Solo egresos
             AND t.usuario_id = ?
-            AND t.fecha BETWEEN ? AND ?
+            AND YEAR(t.fecha) = YEAR(NOW())  -- Solo año actual
+            AND MONTH(t.fecha) = MONTH(NOW())  -- Solo mes actual
             GROUP BY categoria
         `,
-            [userID, startDate, endDate]
+            [userID]
         );
 
         res.status(200).json(rows);
     } catch (error) {
-        res.status(500).json({ message: 'Error al obtener gastos por categoría en el rango de fechas', error: error.message });
+        res.status(500).json({ message: 'Error al obtener gastos por categoría en el año actual', error: error.message });
     }
 };
 
@@ -114,8 +116,10 @@ export const getTop5CategoriesByExpenses = async (req, res) => {
                 SUM(t.monto) AS total_gastos
             FROM transacciones t
             JOIN categorias c ON t.categoria_id = c.id
-            WHERE t.tipo_id = 2
+            WHERE t.tipo_id = 2  -- Solo egresos
             AND t.usuario_id = ?
+            AND YEAR(t.fecha) = YEAR(NOW())  -- Solo año actual
+            AND MONTH(t.fecha) = MONTH(NOW())  -- Solo mes actual
             GROUP BY categoria
             ORDER BY total_gastos DESC
             LIMIT 5
