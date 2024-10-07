@@ -79,3 +79,34 @@ export const deleteTransaction = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// Controlador para editar una transacción existente
+export const editTransaction = async (req, res) => {
+    const { transactionID } = req.params; // Obtenemos el ID de la transacción desde los parámetros de la URL
+    const { monto, descripcion, fecha, tipo_id, categoria_id } = req.body; // Datos que queremos actualizar
+    console.log({ monto, descripcion, fecha, tipo_id, categoria_id });
+    try {
+        // Verificar si la transacción existe
+        const [existingTransaction] = await pool.query('SELECT * FROM transacciones WHERE id = ?', [transactionID]);
+
+        if (existingTransaction.length === 0) {
+            return res.status(404).json({ message: 'Transacción no encontrada' });
+        }
+
+        // Actualizar la transacción
+        const r = await pool.query(
+            `
+            UPDATE transacciones
+            SET monto = ?, descripcion = ?, fecha = ?, tipo_id = ?, categoria_id = ?
+            WHERE id = ?
+        `,
+            [monto, descripcion, fecha, tipo_id, categoria_id, transactionID]
+        );
+        console.log(r);
+
+        res.status(200).json({ message: 'Transacción actualizada exitosamente' });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Error al actualizar la transacción', error: error.message });
+    }
+};
