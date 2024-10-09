@@ -2,7 +2,7 @@ import { verifyToken } from '../utils/jwt.js';
 
 export const authMiddleware = (req, res, next) => {
     const token = req.cookies.token; // Leer el token desde la cookie
-
+    console.log(token);
     if (!token) {
         return res.status(401).json({ message: 'No estás autenticado' });
     }
