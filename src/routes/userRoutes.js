@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post('/', createUser); // Crear un nuevo usuario
 router.post('/login', loginUser); // Login
-router.post('/logout', authMiddleware, logoutUser); // Cerrar sesión
-router.get('/:username', authMiddleware, getUserByUsername); // Obtener usuario por username
+router.post('/logout', logoutUser); // Cerrar sesión
+router.get('/:username', getUserByUsername); // Obtener usuario por username
 
 export default router;
