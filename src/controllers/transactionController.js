@@ -102,7 +102,6 @@ export const editTransaction = async (req, res) => {
         `,
             [monto, descripcion, fecha, tipo_id, categoria_id, transactionID]
         );
-        console.log(r);
 
         res.status(200).json({ message: 'Transacción actualizada exitosamente' });
     } catch (error) {
